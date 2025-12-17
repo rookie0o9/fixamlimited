@@ -9,6 +9,7 @@ import Hero from "@/components/hero";
 import Feedbacks from "@/components/feedbacks";
 import Botpress from "@/components/botpress";
 import BlockmarkWidget from "@/components/blockmark-widget";
+import News from "@/components/news";
 
 export default function Landing() {
   return (
@@ -20,6 +21,7 @@ export default function Landing() {
           <Services />
           <About />
           <Feedbacks />
+          <News />
           <BlockmarkWidget /> 
           <Botpress />
         </main>

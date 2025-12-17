@@ -31,6 +31,13 @@ export default function Header() {
             >
               About
             </ScrollLink>
+            <ScrollLink
+              to="news"
+              className="hover:text-primary-alternate font-semibold underline-offset-4 cursor-pointer"
+              smooth
+            >
+              News
+            </ScrollLink>
             <ModalTrigger
               data-id={ModalIDs.Contact}
               className="hover:text-primary-alternate font-semibold underline-offset-4"
