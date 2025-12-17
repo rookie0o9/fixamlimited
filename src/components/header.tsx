@@ -4,40 +4,78 @@ import ModalTrigger from "@/components/modal-trigger";
 import { ModalIDs } from "@/lib/constants";
 import { Link as ScrollLink } from "react-scroll";
 import Socials from "@/components/socials";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+
   return (
     <>
       <div id="top" />
       <header className="bg-black text-primary-foreground py-4 px-4 md:px-6 fixed left-0 right-0 w-full border-b-2 border-primary-foreground z-[10]">
         <div className="container flex items-center justify-between">
-          <ScrollLink to="top" className="cursor-pointer" smooth>
-            <span className="font-oswald font-thin text-3xl text-primary-alternate hover:text-primary-foreground">
-              fixam
-            </span>
-          </ScrollLink>
+          {isHome ? (
+            <ScrollLink to="top" className="cursor-pointer" smooth>
+              <span className="font-oswald font-thin text-3xl text-primary-alternate hover:text-primary-foreground">
+                fixam
+              </span>
+            </ScrollLink>
+          ) : (
+            <Link href="/" className="cursor-pointer">
+              <span className="font-oswald font-thin text-3xl text-primary-alternate hover:text-primary-foreground">
+                fixam
+              </span>
+            </Link>
+          )}
           <nav className="hidden md:flex items-center gap-4">
-            <ScrollLink
-              to="services"
-              className="hover:text-primary-alternate font-semibold underline-offset-4 cursor-pointer"
-              smooth
-            >
-              Services
-            </ScrollLink>
-            <ScrollLink
-              to="about"
-              className="hover:text-primary-alternate font-semibold underline-offset-4 cursor-pointer"
-              smooth
-            >
-              About
-            </ScrollLink>
-            <ScrollLink
-              to="news"
-              className="hover:text-primary-alternate font-semibold underline-offset-4 cursor-pointer"
-              smooth
-            >
-              News
-            </ScrollLink>
+            {isHome ? (
+              <>
+                <ScrollLink
+                  to="services"
+                  className="hover:text-primary-alternate font-semibold underline-offset-4 cursor-pointer"
+                  smooth
+                >
+                  Services
+                </ScrollLink>
+                <ScrollLink
+                  to="about"
+                  className="hover:text-primary-alternate font-semibold underline-offset-4 cursor-pointer"
+                  smooth
+                >
+                  About
+                </ScrollLink>
+                <ScrollLink
+                  to="news"
+                  className="hover:text-primary-alternate font-semibold underline-offset-4 cursor-pointer"
+                  smooth
+                >
+                  News
+                </ScrollLink>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/#services"
+                  className="hover:text-primary-alternate font-semibold underline-offset-4 cursor-pointer"
+                >
+                  Services
+                </Link>
+                <Link
+                  href="/#about"
+                  className="hover:text-primary-alternate font-semibold underline-offset-4 cursor-pointer"
+                >
+                  About
+                </Link>
+                <Link
+                  href="/#news"
+                  className="hover:text-primary-alternate font-semibold underline-offset-4 cursor-pointer"
+                >
+                  News
+                </Link>
+              </>
+            )}
             <ModalTrigger
               data-id={ModalIDs.Contact}
               className="hover:text-primary-alternate font-semibold underline-offset-4"

@@ -1,43 +1,5 @@
-import { LuHardDrive, LuLaptop, LuPower } from "react-icons/lu";
-
-const services = [
-  {
-    title: "Business IT Support",
-    description:
-      "Unlimited helpdesk, remote monitoring and on-site escalation when your team needs extra hands.",
-    Icon: LuLaptop,
-  },
-  {
-    title: "Microsoft 365",
-    description:
-      "Migrations, licensing and security hardening across Entra, Intune and Exchange.",
-    Icon: LuHardDrive,
-  },
-  {
-    title: "Cyber Security",
-    description:
-      "Policies, training and tools such as XDR and secure email to lower your cyber risk.",
-    Icon: LuPower,
-  },
-  {
-    title: "Connectivity",
-    description:
-      "Business broadband, leased lines and resilient 4G/5G backup to keep everyone online.",
-    Icon: LuLaptop,
-  },
-  {
-    title: "Cloud Backup",
-    description:
-      "Automated, monitored backup for endpoints, on-prem servers and Microsoft 365.",
-    Icon: LuHardDrive,
-  },
-  {
-    title: "IT Consultancy",
-    description:
-      "Audits, roadmaps and solution design aligned to risk, growth plans and budget.",
-    Icon: LuPower,
-  },
-];
+import Link from "next/link";
+import { services } from "@/lib/services";
 
 export default function Services() {
   return (
@@ -52,10 +14,12 @@ export default function Services() {
           </div>
         </div>
         <div className="mx-auto grid max-w-5xl items-stretch gap-6 py-12 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
-          {services.map(({ title, description, Icon }) => (
-            <div
-              key={title}
-              className="flex flex-col gap-4 rounded-xl border bg-background p-6 text-left shadow-sm"
+          {services.map(({ slug, title, description, Icon }) => (
+            <Link
+              key={slug}
+              href={`/services/${slug}`}
+              aria-label={`Learn more about ${title}`}
+              className="group flex flex-col gap-4 rounded-xl border bg-background p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <Icon className="h-12 w-12 text-primary" />
               <div className="space-y-2 flex-1">
@@ -64,7 +28,10 @@ export default function Services() {
                   {description}
                 </p>
               </div>
-            </div>
+              <span className="text-sm font-semibold text-primary underline-offset-4 group-hover:underline">
+                Learn more
+              </span>
+            </Link>
           ))}
         </div>
       </div>
