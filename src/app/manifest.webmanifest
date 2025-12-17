@@ -1,0 +1,53 @@
+{
+    "name": "Fixam",
+    "short_name": "Fixam",
+    "start_url": "/",
+    "display": "standalone",
+    "description": "Reliable IT Services for Businesses in the UK",
+    "lang": "en",
+    "dir": "auto",
+    "theme_color": "#048537",
+    "background_color": "#ffffff",
+    "orientation": "any",
+    "icons": [
+        {
+            "src": "https://i.ibb.co/GT3zfjH/512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "https://i.ibb.co/wQ43mHy/192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ],
+    "prefer_related_applications": false,
+    "shortcuts": [
+        {
+            "name": "Home",
+            "url": "/"
+        },
+        {
+            "name": "About",
+            "url": "/#about"
+        },
+        {
+            "name": "Services",
+            "url": "/#services"
+        },
+        {
+            "name": "Contact",
+            "url": "https://forms.gle/Rhur3KjJCNceuGdX8"
+        },
+        {
+            "name": "Inquiry",
+            "url": "https://forms.gle/w9YiGhkA2MrFmfpu9"
+        },
+        {
+            "name": "Leave a Feedback",
+            "url": "https://forms.gle/Gq2EyVrJ3pf8CVbB7"
+        }
+    ]
+}
