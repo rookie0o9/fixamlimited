@@ -87,7 +87,7 @@
 @layer components {
   .blockmark-widget {
     border: none;
-    width: 132px;
-    height: 132px;
+    width: 100px;
+    height: 100px;
   }
 }
