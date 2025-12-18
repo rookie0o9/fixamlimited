@@ -49,7 +49,7 @@ This site can send enquiries/leads and feedback submissions to Google Sheets (vi
 
 - `FEEDBACK_SHEET_ID`: Google Spreadsheet ID
 - `FEEDBACK_SHEET_RANGE`: append range (default `Feedback!A1`)
-- `FEEDBACK_SHEET_READ_RANGE`: read range (default `Feedback!A2:K`)
+- `FEEDBACK_SHEET_READ_RANGE`: read range (default `Feedback!A1:K`)
 - `FEEDBACK_REQUIRE_APPROVAL`: set `true` to require manual approval before showing testimonials.
 
 ### Trustpilot (client-side widget)

@@ -1,7 +1,6 @@
 "use server";
 import { generateAvatar } from "@/lib/avatars";
 import { auth, sheets } from "@googleapis/sheets";
-import { cache } from "react";
 import { existsSync, readFileSync } from "node:fs";
 
 export type WebsiteFeedback = {
@@ -117,7 +116,7 @@ function formatPosition(position: string, company: string) {
   return position || company || "Client";
 }
 
-const sheetsGetValues = cache(async (spreadsheetId: string, range: string) => {
+async function sheetsGetValues(spreadsheetId: string, range: string) {
   try {
     if (!sheetsAuth) return [];
 
@@ -133,7 +132,7 @@ const sheetsGetValues = cache(async (spreadsheetId: string, range: string) => {
     console.error("Error fetching sheet values:", error);
     return [];
   }
-});
+}
 
 function generateDummyFeedbacks(count: number = 3) {
   const users = [
@@ -177,7 +176,7 @@ export async function sheetsGetFeedbacks(limit: number = 6): Promise<WebsiteFeed
 
     const newSheetId = normalizeSpreadsheetId(process.env.FEEDBACK_SHEET_ID);
     if (newSheetId) {
-      const range = normalizeA1Range(process.env.FEEDBACK_SHEET_READ_RANGE ?? "Feedback!A2:K");
+      const range = normalizeA1Range(process.env.FEEDBACK_SHEET_READ_RANGE ?? "Feedback!A1:K");
       const values = await sheetsGetValues(newSheetId, range);
 
       const items = values

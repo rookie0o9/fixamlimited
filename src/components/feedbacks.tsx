@@ -101,7 +101,10 @@ export default function Feedbacks() {
           ) : (
             <div className="mx-auto max-w-3xl py-10 text-center">
               <p className="text-muted-foreground">
-                No testimonials yet — be the first to leave feedback.
+                No published testimonials yet — be the first to leave feedback.
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Only feedback marked as OK to publish will appear here.
               </p>
             </div>
           )
