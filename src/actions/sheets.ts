@@ -12,6 +12,33 @@ export type WebsiteFeedback = {
   source?: "Fixam" | "Trustpilot";
 };
 
+function feedbackKey(item: WebsiteFeedback) {
+  return [
+    item.source ?? "",
+    item.name,
+    item.position,
+    item.feedback,
+    typeof item.rating === "number" ? String(item.rating) : "",
+  ]
+    .map((part) => part.trim().toLowerCase())
+    .join("|");
+}
+
+function dedupeLatest(items: WebsiteFeedback[]) {
+  const seen = new Set<string>();
+  const unique: WebsiteFeedback[] = [];
+
+  for (let i = items.length - 1; i >= 0; i--) {
+    const item = items[i];
+    const key = feedbackKey(item);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(item);
+  }
+
+  return unique; // newest-first
+}
+
 function stripWrappingQuotes(value: string) {
   const trimmed = value.trim();
   if (
@@ -169,7 +196,7 @@ function generateDummyFeedbacks(count: number = 3) {
   })) satisfies WebsiteFeedback[];
 }
 
-export async function sheetsGetFeedbacks(limit: number = 6): Promise<WebsiteFeedback[]> {
+export async function sheetsGetFeedbacks(limit: number = 3): Promise<WebsiteFeedback[]> {
   try {
     const isProduction = process.env.NODE_ENV === "production";
     if (!sheetsAuth) return isProduction ? [] : generateDummyFeedbacks(Math.min(3, limit));
@@ -204,7 +231,7 @@ export async function sheetsGetFeedbacks(limit: number = 6): Promise<WebsiteFeed
         })
         .filter((item): item is NonNullable<typeof item> => item !== null);
 
-      return items.slice(0, limit);
+      return dedupeLatest(items).slice(0, limit);
     }
 
     const legacySheetId = process.env.FEEDBACK_FORM_SHEET_ID?.trim();
@@ -234,7 +261,7 @@ export async function sheetsGetFeedbacks(limit: number = 6): Promise<WebsiteFeed
       })
       .filter((item): item is NonNullable<typeof item> => item !== null);
 
-    return legacyItems.slice(0, limit);
+    return dedupeLatest(legacyItems).slice(0, limit);
   } catch (error) {
     console.error("Error fetching feedbacks:", error);
     const isProduction = process.env.NODE_ENV === "production";

@@ -53,22 +53,7 @@ export default function TrustpilotWidget() {
   }, [scriptReady, theme, loadWidget]);
 
   if (!businessUnitId || !templateId) {
-    return (
-      <div className="rounded-xl border bg-background p-6 text-center">
-        <h3 className="text-lg font-semibold">Trustpilot reviews</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Add your Trustpilot TrustBox widget IDs to show live reviews here.
-        </p>
-        <a
-          href={TRUSTPILOT_REVIEW_URL}
-          target="_blank"
-          rel="noreferrer noopener"
-          className="mt-4 inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-6 text-sm font-medium text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground"
-        >
-          Open Trustpilot
-        </a>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -114,4 +99,3 @@ export default function TrustpilotWidget() {
     </div>
   );
 }
-

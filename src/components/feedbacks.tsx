@@ -30,8 +30,8 @@ export default function Feedbacks() {
     try {
       setHasError(false);
       const url = bustCache
-        ? `/api/feedbacks?limit=6&_=${Date.now()}`
-        : "/api/feedbacks?limit=6";
+        ? `/api/feedbacks?limit=3&_=${Date.now()}`
+        : "/api/feedbacks?limit=3";
       const res = await fetch(url, {
         headers: { accept: "application/json" },
       });

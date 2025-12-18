@@ -1,7 +1,7 @@
 import { sheetsGetFeedbacks } from "@/actions/sheets";
 import { NextResponse } from "next/server";
 
-const DEFAULT_LIMIT = 6;
+const DEFAULT_LIMIT = 3;
 const MAX_LIMIT = 24;
 
 function clampLimit(raw: string | null): number {
@@ -28,4 +28,3 @@ export async function GET(request: Request) {
     }
   );
 }
-
