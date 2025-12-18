@@ -13,6 +13,41 @@ export type WebsiteFeedback = {
   source?: "Fixam" | "Trustpilot";
 };
 
+function stripWrappingQuotes(value: string) {
+  const trimmed = value.trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
+function normalizeSpreadsheetId(raw: string | undefined) {
+  if (!raw) return null;
+  const value = stripWrappingQuotes(raw);
+  if (!value) return null;
+
+  const match = value.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  return match?.[1] ?? value;
+}
+
+function normalizeA1Range(raw: string) {
+  const value = stripWrappingQuotes(raw);
+  const exclamation = value.indexOf("!");
+  if (exclamation <= 0) return value;
+
+  const sheet = value.slice(0, exclamation);
+  const rest = value.slice(exclamation);
+
+  if (sheet.startsWith("'")) return value;
+  if (!sheet.includes(" ")) return value;
+
+  const escaped = sheet.replace(/'/g, "''");
+  return `'${escaped}'${rest}`;
+}
+
 function loadCredentials() {
   const rawCredentials = process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim();
   if (!rawCredentials) {
@@ -140,9 +175,9 @@ export async function sheetsGetFeedbacks(limit: number = 6): Promise<WebsiteFeed
     const isProduction = process.env.NODE_ENV === "production";
     if (!sheetsAuth) return isProduction ? [] : generateDummyFeedbacks(Math.min(3, limit));
 
-    const newSheetId = process.env.FEEDBACK_SHEET_ID?.trim();
+    const newSheetId = normalizeSpreadsheetId(process.env.FEEDBACK_SHEET_ID);
     if (newSheetId) {
-      const range = process.env.FEEDBACK_SHEET_READ_RANGE ?? "Feedback!A2:K";
+      const range = normalizeA1Range(process.env.FEEDBACK_SHEET_READ_RANGE ?? "Feedback!A2:K");
       const values = await sheetsGetValues(newSheetId, range);
 
       const items = values

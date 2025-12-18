@@ -22,6 +22,41 @@ type LeadFieldName =
 
 type LeadKind = "contact" | "inquiry";
 
+function stripWrappingQuotes(value: string) {
+  const trimmed = value.trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
+function normalizeSpreadsheetId(raw: string | undefined) {
+  if (!raw) return null;
+  const value = stripWrappingQuotes(raw);
+  if (!value) return null;
+
+  const match = value.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  return match?.[1] ?? value;
+}
+
+function normalizeA1Range(raw: string) {
+  const value = stripWrappingQuotes(raw);
+  const exclamation = value.indexOf("!");
+  if (exclamation <= 0) return value;
+
+  const sheet = value.slice(0, exclamation);
+  const rest = value.slice(exclamation);
+
+  if (sheet.startsWith("'")) return value;
+  if (!sheet.includes(" ")) return value;
+
+  const escaped = sheet.replace(/'/g, "''");
+  return `'${escaped}'${rest}`;
+}
+
 function loadCredentials() {
   const rawCredentials = process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim();
   if (!rawCredentials) return null;
@@ -74,7 +109,7 @@ function isValidEmail(email: string) {
 }
 
 async function appendLeadRow(values: string[]) {
-  const spreadsheetId = process.env.LEADS_SHEET_ID;
+  const spreadsheetId = normalizeSpreadsheetId(process.env.LEADS_SHEET_ID);
   if (!spreadsheetId || !sheetsAuth) {
     console.warn(
       "LEADS_SHEET_ID / GOOGLE_APPLICATION_CREDENTIALS not set. Lead logged to console only."
@@ -83,7 +118,7 @@ async function appendLeadRow(values: string[]) {
     return;
   }
 
-  const range = process.env.LEADS_SHEET_RANGE ?? "Leads!A1";
+  const range = normalizeA1Range(process.env.LEADS_SHEET_RANGE ?? "Leads!A1");
 
   await sheets("v4").spreadsheets.values.append({
     auth: sheetsAuth,
@@ -155,11 +190,16 @@ export async function submitLead(
 
     return { status: "success", message: "Thanks — we'll be in touch shortly." };
   } catch (error) {
-    console.error("Error submitting lead:", error);
+    const ref =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : String(Date.now());
+
+    console.error(`[lead:${ref}] Error submitting lead:`, error);
     return {
       status: "error",
       message:
-        "Something went wrong. Please email info@fixam.co.uk or call +44 7733 738545.",
+        `Something went wrong (ref: ${ref}). Please email info@fixam.co.uk or call +44 7733 738545.`,
     };
   }
 }

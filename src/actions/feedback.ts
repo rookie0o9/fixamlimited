@@ -18,6 +18,52 @@ type FeedbackFieldName =
   | "company"
   | "feedback";
 
+function stripWrappingQuotes(value: string) {
+  const trimmed = value.trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
+function normalizeSpreadsheetId(raw: string | undefined) {
+  if (!raw) return null;
+  const value = stripWrappingQuotes(raw);
+  if (!value) return null;
+
+  const match = value.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  return match?.[1] ?? value;
+}
+
+function normalizeA1Range(raw: string) {
+  const value = stripWrappingQuotes(raw);
+  const exclamation = value.indexOf("!");
+  if (exclamation <= 0) return value;
+
+  const sheet = value.slice(0, exclamation);
+  const rest = value.slice(exclamation);
+
+  if (sheet.startsWith("'")) return value;
+  if (!sheet.includes(" ")) return value;
+
+  const escaped = sheet.replace(/'/g, "''");
+  return `'${escaped}'${rest}`;
+}
+
+function parseSheetTitleFromRange(range: string) {
+  const exclamation = range.indexOf("!");
+  if (exclamation <= 0) return null;
+  let sheet = range.slice(0, exclamation).trim();
+
+  if (sheet.startsWith("'") && sheet.endsWith("'")) sheet = sheet.slice(1, -1);
+  sheet = sheet.replace(/''/g, "'");
+
+  return sheet.trim() || null;
+}
+
 function loadCredentials() {
   const rawCredentials = process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim();
   if (!rawCredentials) return null;
@@ -81,8 +127,42 @@ function parseBoolean(value: unknown) {
   return cleaned === "true" || cleaned === "on" || cleaned === "1" || cleaned === "yes";
 }
 
+async function ensureSheetTab(spreadsheetId: string, range: string) {
+  if (!sheetsAuth) return;
+
+  const title = parseSheetTitleFromRange(range);
+  if (!title) return;
+
+  const existing = await sheets("v4").spreadsheets.get({
+    auth: sheetsAuth,
+    spreadsheetId,
+    fields: "sheets(properties(title))",
+  });
+
+  const titles =
+    existing.data.sheets
+      ?.map((sheet) => sheet.properties?.title)
+      .filter((t): t is string => Boolean(t)) ?? [];
+
+  if (titles.includes(title)) return;
+
+  try {
+    await sheets("v4").spreadsheets.batchUpdate({
+      auth: sheetsAuth,
+      spreadsheetId,
+      requestBody: {
+        requests: [{ addSheet: { properties: { title } } }],
+      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.toLowerCase().includes("already exists")) return;
+    throw error;
+  }
+}
+
 async function appendFeedbackRow(values: string[]) {
-  const spreadsheetId = process.env.FEEDBACK_SHEET_ID;
+  const spreadsheetId = normalizeSpreadsheetId(process.env.FEEDBACK_SHEET_ID);
   if (!spreadsheetId || !sheetsAuth) {
     console.warn(
       "FEEDBACK_SHEET_ID / GOOGLE_APPLICATION_CREDENTIALS not set. Feedback logged to console only."
@@ -91,7 +171,9 @@ async function appendFeedbackRow(values: string[]) {
     return;
   }
 
-  const range = process.env.FEEDBACK_SHEET_RANGE ?? "Feedback!A1";
+  const range = normalizeA1Range(process.env.FEEDBACK_SHEET_RANGE ?? "Feedback!A1");
+
+  await ensureSheetTab(spreadsheetId, range);
 
   await sheets("v4").spreadsheets.values.append({
     auth: sheetsAuth,
@@ -166,12 +248,16 @@ export async function submitFeedback(
 
     return { status: "success", message };
   } catch (error) {
-    console.error("Error submitting feedback:", error);
+    const ref =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : String(Date.now());
+
+    console.error(`[feedback:${ref}] Error submitting feedback:`, error);
     return {
       status: "error",
       message:
-        "Something went wrong. Please email info@fixam.co.uk or call +44 7733 738545.",
+        `Something went wrong (ref: ${ref}). Please email info@fixam.co.uk or call +44 7733 738545.`,
     };
   }
 }
-
