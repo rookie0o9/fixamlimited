@@ -24,6 +24,7 @@ export default function Hero() {
             <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:justify-center lg:justify-start pt-2">
               <ModalTrigger
                 data-id={ModalIDs.Inquiry}
+                data-service="business-it-support"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50"
               >
                 See support packages

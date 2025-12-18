@@ -2,18 +2,39 @@
 import { generateAvatar } from "@/lib/avatars";
 import { auth, sheets } from "@googleapis/sheets";
 import { cache } from "react";
+import { existsSync, readFileSync } from "node:fs";
 
 function loadCredentials() {
-  const encodedCredentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-  if (!encodedCredentials) {
+  const rawCredentials = process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim();
+  if (!rawCredentials) {
     console.warn("GOOGLE_APPLICATION_CREDENTIALS not set. Falling back to dummy feedbacks.");
     return null;
   }
 
   try {
-    return JSON.parse(
-      Buffer.from(encodedCredentials, "base64").toString().replace(/\n/g, "")
-    );
+    if (rawCredentials.startsWith("{")) return JSON.parse(rawCredentials);
+
+    if (
+      rawCredentials.startsWith("/") ||
+      rawCredentials.startsWith("./") ||
+      rawCredentials.startsWith("../") ||
+      rawCredentials.endsWith(".json")
+    ) {
+      if (!existsSync(rawCredentials)) {
+        console.warn(
+          "GOOGLE_APPLICATION_CREDENTIALS points to a file that does not exist. Falling back to dummy feedbacks."
+        );
+        return null;
+      }
+
+      return JSON.parse(readFileSync(rawCredentials, "utf8"));
+    }
+
+    const decoded = Buffer.from(rawCredentials.replace(/\s/g, ""), "base64")
+      .toString()
+      .replace(/\r?\n/g, "");
+
+    return JSON.parse(decoded);
   } catch (error) {
     console.error("Failed to parse GOOGLE_APPLICATION_CREDENTIALS:", error);
     return null;
