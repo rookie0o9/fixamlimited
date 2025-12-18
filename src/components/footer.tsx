@@ -9,14 +9,14 @@ export default function Footer() {
   const isHome = pathname === "/";
 
   return (
-    <footer className="bg-black text-primary-foreground py-6 w-full shrink-0 font-semibold">
+    <footer className="bg-background text-foreground py-6 w-full shrink-0 font-semibold border-t border-border">
       <div className="container flex flex-col md:flex-row items-center justify-between">
         <p>
           &copy; 2024{" "}
           {isHome ? (
             <ScrollLink
               to="top"
-              className="cursor-pointer hover:underline underline-offset-4 hover:text-primary-foreground text-primary-alternate"
+              className="cursor-pointer hover:underline underline-offset-4 hover:text-foreground text-primary-alternate"
               smooth
             >
               Fixam
@@ -24,7 +24,7 @@ export default function Footer() {
           ) : (
             <Link
               href="/"
-              className="cursor-pointer hover:underline underline-offset-4 hover:text-primary-foreground text-primary-alternate"
+              className="cursor-pointer hover:underline underline-offset-4 hover:text-foreground text-primary-alternate"
             >
               Fixam
             </Link>

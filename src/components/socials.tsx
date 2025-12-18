@@ -6,7 +6,7 @@ export default function Socials() {
     <>
       <a
         href="https://www.yelp.co.uk/biz/fixam"
-        className="text-primary-foreground hover:text-primary-alternate"
+        className="text-foreground hover:text-primary-alternate"
         target="_blank"
         rel="noopener"
       >
@@ -15,7 +15,7 @@ export default function Socials() {
       </a>
       <a
         href="https://x.com/fixamcouk"
-        className="text-primary-foreground hover:text-primary-alternate"
+        className="text-foreground hover:text-primary-alternate"
         target="_blank"
         rel="noopener"
       >
@@ -24,7 +24,7 @@ export default function Socials() {
       </a>
       <a
         href="https://www.linkedin.com/company/fixam-co-uk"
-        className="text-primary-foreground hover:text-primary-alternate"
+        className="text-foreground hover:text-primary-alternate"
         target="_blank"
         rel="noopener"
       >

@@ -10,7 +10,7 @@ export default function ServicesLayout({ children }: Readonly<PropsWithChildren>
     <ModalProvider>
       <div className="flex flex-col min-h-[100dvh]">
         <Header />
-        <main className="flex-1 pt-14 md:pt-10 lg:pt-6 bg-black">{children}</main>
+        <main className="flex-1 pt-14 md:pt-10 lg:pt-6 bg-background">{children}</main>
         <Footer />
         <WhatsppIcon />
       </div>
@@ -18,4 +18,3 @@ export default function ServicesLayout({ children }: Readonly<PropsWithChildren>
     </ModalProvider>
   );
 }
-

@@ -19,8 +19,30 @@ const oswald = Oswald({
 
 export default function RootLayout({ children }: Readonly<PropsWithChildren>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`
+            (() => {
+              try {
+                const stored = localStorage.getItem("theme");
+                const systemPrefersDark =
+                  window.matchMedia &&
+                  window.matchMedia("(prefers-color-scheme: dark)").matches;
+                const theme =
+                  stored === "dark" || stored === "light"
+                    ? stored
+                    : systemPrefersDark
+                      ? "dark"
+                      : "light";
+
+                const root = document.documentElement;
+                if (theme === "dark") root.classList.add("dark");
+                else root.classList.remove("dark");
+              } catch {}
+            })();
+          `}
+        </Script>
         {/* Google Tag Manager (gtag.js) */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-CBRBTJCBQ5"
@@ -36,7 +58,7 @@ export default function RootLayout({ children }: Readonly<PropsWithChildren>) {
         </Script>
       </head>
       <body
-        className={`${roboto.variable} ${oswald.variable} antialiased bg-black`}
+        className={`${roboto.variable} ${oswald.variable} antialiased`}
       >
         {children}
       </body>

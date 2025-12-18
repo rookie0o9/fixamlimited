@@ -16,7 +16,7 @@ export default function Landing() {
     <ModalProvider>
       <div className="flex flex-col min-h-[100dvh]">
         <Header />
-        <main className="flex-1 pt-14 md:pt-10 lg:pt-6 bg-black">
+        <main className="flex-1 pt-14 md:pt-10 lg:pt-6 bg-background">
           <Hero />
           <Services />
           <About />
