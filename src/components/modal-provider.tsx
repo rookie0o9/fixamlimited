@@ -6,7 +6,6 @@ import {
   PropsWithChildren,
   RefObject,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -22,8 +21,6 @@ type ModalContextType = {
 
   modalId?: ModalIDs;
   modalServiceSlug?: string;
-
-  modalIframe?: { src: string; title: string };
 };
 
 export const ModalContext = createContext({} as ModalContextType);
@@ -34,15 +31,6 @@ export default function ModalProvider({ children }: PropsWithChildren) {
   const dialog = useRef<HTMLDialogElement>(null);
   const modalTrigger = useRef<HTMLButtonElement>(null);
   const modalCloseButton = useRef<HTMLButtonElement>(null);
-
-  const modalIframe = useMemo(() => {
-    if (modalId !== ModalIDs.Feedback) return undefined;
-
-    return {
-      src: "https://docs.google.com/forms/d/e/1FAIpQLScFwj091WMVaO66pe2qAzT7uJQyBWaXCQPuR8F5XesDtS07lw/viewform?embedded=true",
-      title: "Feedback Form",
-    };
-  }, [modalId]);
 
   const openModal: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
@@ -75,7 +63,6 @@ export default function ModalProvider({ children }: PropsWithChildren) {
 
         modalId,
         modalServiceSlug,
-        modalIframe,
       }}
     >
       {children}

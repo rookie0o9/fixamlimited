@@ -4,6 +4,15 @@ import { auth, sheets } from "@googleapis/sheets";
 import { cache } from "react";
 import { existsSync, readFileSync } from "node:fs";
 
+export type WebsiteFeedback = {
+  avatar: string;
+  name: string;
+  position: string;
+  feedback: string;
+  rating?: number;
+  source?: "Fixam" | "Trustpilot";
+};
+
 function loadCredentials() {
   const rawCredentials = process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim();
   if (!rawCredentials) {
@@ -50,34 +59,46 @@ const sheetsAuth = credential
     })
   : null;
 
-const sheetsGetResponses = cache(
-  async (spreadsheetId: string, range: string) => {
-    try {
-      if (!sheetsAuth) return [];
+function clean(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
 
-      const response = await sheets("v4").spreadsheets.values.get({
-        auth: sheetsAuth,
-        spreadsheetId,
-        range,
-      });
-      const values = response.data.values;
-      if (!values) return [];
+function parseBoolean(value: unknown) {
+  const normalized = clean(value).toLowerCase();
+  return normalized === "true" || normalized === "1" || normalized === "yes" || normalized === "on";
+}
 
-      return (values as string[][])
-        .map((response) => ({
-          avatar: generateAvatar(response[4]),
-          name: response[4],
-          position: response[6],
-          feedback: response[2],
-          isValid: response[7] === "TRUE",
-        }))
-        .filter((response) => response.isValid);
-    } catch (e) {
-      console.error(e);
-      return [];
-    }
+function parseRating(value: unknown) {
+  const normalized = clean(value);
+  if (!normalized) return undefined;
+  const parsed = Number.parseInt(normalized, 10);
+  if (Number.isNaN(parsed)) return undefined;
+  if (parsed < 1 || parsed > 5) return undefined;
+  return parsed;
+}
+
+function formatPosition(position: string, company: string) {
+  if (position && company) return `${position} · ${company}`;
+  return position || company || "Client";
+}
+
+const sheetsGetValues = cache(async (spreadsheetId: string, range: string) => {
+  try {
+    if (!sheetsAuth) return [];
+
+    const response = await sheets("v4").spreadsheets.values.get({
+      auth: sheetsAuth,
+      spreadsheetId,
+      range,
+    });
+    const values = response.data.values;
+    if (!values) return [];
+    return values as string[][];
+  } catch (error) {
+    console.error("Error fetching sheet values:", error);
+    return [];
   }
-);
+});
 
 function generateDummyFeedbacks(count: number = 3) {
   const users = [
@@ -109,34 +130,80 @@ function generateDummyFeedbacks(count: number = 3) {
     name: `${users[i]}`,
     position: positions[Math.floor(Math.random() * positions.length)],
     feedback: feedbacks[i % feedbacks.length],
-    isValid: true,
-  }));
+    rating: 5,
+    source: "Fixam",
+  })) satisfies WebsiteFeedback[];
 }
 
-export async function sheetsGetFeedbacks() {
+export async function sheetsGetFeedbacks(limit: number = 6): Promise<WebsiteFeedback[]> {
   try {
-    if (!sheetsAuth) {
-      return generateDummyFeedbacks();
+    const isProduction = process.env.NODE_ENV === "production";
+    if (!sheetsAuth) return isProduction ? [] : generateDummyFeedbacks(Math.min(3, limit));
+
+    const newSheetId = process.env.FEEDBACK_SHEET_ID?.trim();
+    if (newSheetId) {
+      const range = process.env.FEEDBACK_SHEET_READ_RANGE ?? "Feedback!A2:K";
+      const values = await sheetsGetValues(newSheetId, range);
+
+      const items = values
+        .map((row) => {
+          const fullName = clean(row[1]);
+          const email = clean(row[2]);
+          const rating = parseRating(row[3]);
+          const position = clean(row[4]);
+          const company = clean(row[5]);
+          const feedback = clean(row[6]);
+          const publishConsent = parseBoolean(row[7]);
+          const approved = row[8] === undefined ? publishConsent : parseBoolean(row[8]);
+
+          if (!fullName || !feedback) return null;
+          if (!approved) return null;
+
+          return {
+            avatar: generateAvatar(email || fullName),
+            name: fullName,
+            position: formatPosition(position, company),
+            feedback,
+            rating,
+            source: "Fixam",
+          } satisfies WebsiteFeedback;
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null);
+
+      return items.slice(0, limit);
     }
 
-    const sheetId = process.env.FEEDBACK_FORM_SHEET_ID;
-    if (!sheetId) {
-      console.warn("FEEDBACK_FORM_SHEET_ID not set. Falling back to dummy feedbacks.");
-      return generateDummyFeedbacks();
+    const legacySheetId = process.env.FEEDBACK_FORM_SHEET_ID?.trim();
+    if (!legacySheetId) {
+      console.warn(
+        "FEEDBACK_SHEET_ID / FEEDBACK_FORM_SHEET_ID not set. Falling back to dummy feedbacks."
+      );
+      return isProduction ? [] : generateDummyFeedbacks(Math.min(3, limit));
     }
 
-    const formResponses = await sheetsGetResponses(sheetId, "Form Responses 1!A2:I");
-    const responses =
-      formResponses.length >= 3
-        ? formResponses.slice(0, 3)
-        : [
-            ...formResponses,
-            ...generateDummyFeedbacks(3 - formResponses.length),
-          ];
+    const legacyValues = await sheetsGetValues(legacySheetId, "Form Responses 1!A2:I");
+    const legacyItems = legacyValues
+      .map((row) => {
+        const feedback = clean(row[2]);
+        const fullName = clean(row[4]);
+        const position = clean(row[6]);
+        const isValid = clean(row[7]).toUpperCase() === "TRUE";
+        if (!isValid || !fullName || !feedback) return null;
 
-    return responses;
+        return {
+          avatar: generateAvatar(fullName),
+          name: fullName,
+          position: position || "Client",
+          feedback,
+          source: "Fixam",
+        } satisfies WebsiteFeedback;
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
+
+    return legacyItems.slice(0, limit);
   } catch (error) {
     console.error("Error fetching feedbacks:", error);
-    return generateDummyFeedbacks(); // Fallback to dummy data in case of an error
+    const isProduction = process.env.NODE_ENV === "production";
+    return isProduction ? [] : generateDummyFeedbacks(Math.min(3, limit));
   }
 }

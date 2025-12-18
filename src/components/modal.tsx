@@ -2,10 +2,10 @@
 import useModalContext from "@/hooks/use-modal-context";
 import { ModalIDs } from "@/lib/constants";
 import LeadForm from "@/components/lead-form";
+import FeedbackForm from "@/components/feedback-form";
 
 export default function Modal() {
-  const { dialog, closeModal, modalId, modalServiceSlug, modalIframe } =
-    useModalContext();
+  const { dialog, closeModal, modalId, modalServiceSlug } = useModalContext();
   if (!modalId) return null;
 
   return (
@@ -30,14 +30,8 @@ export default function Modal() {
           Close
         </button>
         <div className="max-h-[calc(100vh-2rem)] overflow-auto p-6 pt-16 md:p-8 md:pt-16">
-          {modalId === ModalIDs.Feedback && modalIframe ? (
-            <iframe
-              src={modalIframe.src}
-              className="w-full h-[80vh] md:h-[70vh]"
-              title={modalIframe.title}
-            >
-              <p className="text-center pt-10">Loading…</p>
-            </iframe>
+          {modalId === ModalIDs.Feedback ? (
+            <FeedbackForm />
           ) : modalId === ModalIDs.Inquiry ? (
             <LeadForm kind="inquiry" defaultServiceSlug={modalServiceSlug} />
           ) : modalId === ModalIDs.Contact ? (
