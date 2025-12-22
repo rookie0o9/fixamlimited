@@ -52,6 +52,26 @@ This site can send enquiries/leads and feedback submissions to Google Sheets (vi
 - `FEEDBACK_SHEET_READ_RANGE`: read range (default `Feedback!A1:K`)
 - `FEEDBACK_REQUIRE_APPROVAL`: set `true` to require manual approval before showing testimonials.
 
+### Notifications (optional)
+
+Enable notifications when leads/feedback are submitted (recommended for production).
+
+**Resend email**
+
+- `RESEND_API_KEY`
+- `NOTIFY_EMAIL_FROM` (e.g. `Fixam <no-reply@fixam.co.uk>`)
+- `NOTIFY_EMAIL_TO` (comma-separated list)
+- `NOTIFY_EMAIL_REPLY_TO` (optional)
+
+**Webhook (e.g. Slack)**
+
+- `NOTIFY_WEBHOOK_URL` (Slack incoming webhook URL or any endpoint that accepts a JSON `{ "text": "..." }`)
+
+**General**
+
+- `NOTIFY_ENABLED` (optional; set `false` to disable)
+- `NOTIFY_SUBJECT_PREFIX` (optional; default `Fixam`)
+
 ### Trustpilot (client-side widget)
 
 To show live Trustpilot reviews on the homepage, set:

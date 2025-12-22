@@ -3,6 +3,7 @@
 import { auth, sheets } from "@googleapis/sheets";
 import { headers } from "next/headers";
 import { existsSync, readFileSync } from "node:fs";
+import { notifyFeedback } from "@/actions/notify";
 
 export type FeedbackFormState = {
   status: "idle" | "success" | "error";
@@ -221,6 +222,14 @@ export async function submitFeedback(
       return { status: "error", message: "Please check the form.", fieldErrors };
     }
 
+    if (rating === null) {
+      return {
+        status: "error",
+        message: "Please check the form.",
+        fieldErrors: { rating: "Please select a rating." },
+      };
+    }
+
     const headerList = headers();
     const referer = headerList.get("referer") ?? "";
     const userAgent = headerList.get("user-agent") ?? "";
@@ -239,6 +248,18 @@ export async function submitFeedback(
       referer,
       userAgent,
     ]);
+
+    await notifyFeedback({
+      timestamp,
+      fullName,
+      email,
+      rating,
+      position,
+      company,
+      feedback,
+      publishConsent,
+      referer,
+    });
 
     const message = publishConsent
       ? requiresApproval

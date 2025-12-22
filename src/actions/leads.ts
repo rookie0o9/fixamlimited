@@ -3,6 +3,7 @@
 import { auth, sheets } from "@googleapis/sheets";
 import { headers } from "next/headers";
 import { existsSync, readFileSync } from "node:fs";
+import { notifyLead } from "@/actions/notify";
 
 export type LeadFormState = {
   status: "idle" | "success" | "error";
@@ -187,6 +188,18 @@ export async function submitLead(
       referer,
       userAgent,
     ]);
+
+    await notifyLead({
+      timestamp,
+      kind,
+      serviceSlug,
+      fullName,
+      email,
+      phone,
+      company,
+      message,
+      referer,
+    });
 
     return { status: "success", message: "Thanks — we'll be in touch shortly." };
   } catch (error) {
