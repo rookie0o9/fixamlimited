@@ -122,6 +122,41 @@ function shouldNotify() {
   return true;
 }
 
+export async function notifyText(subject: string, text: string, replyTo?: string) {
+  if (!shouldNotify()) return;
+
+  const toRaw = clean(process.env.NOTIFY_EMAIL_TO);
+  const from = clean(process.env.NOTIFY_EMAIL_FROM);
+  const fallbackReplyTo = clean(process.env.NOTIFY_EMAIL_REPLY_TO);
+  const to = toRaw ? splitEmails(toRaw) : [];
+
+  const tasks: Promise<unknown>[] = [];
+
+  if (to.length > 0 && from) {
+    tasks.push(
+      maybeSendResendEmail({
+        from,
+        to,
+        subject,
+        text,
+        html: `<pre style="white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${escapeHtml(
+          text
+        )}</pre>`,
+        reply_to: replyTo || fallbackReplyTo || undefined,
+      })
+    );
+  }
+
+  tasks.push(maybeSendSlackWebhook({ text: `${subject}\n\n${text}`.trim() }));
+
+  const results = await Promise.allSettled(tasks);
+  for (const result of results) {
+    if (result.status === "rejected") {
+      console.error("Notification failed:", result.reason);
+    }
+  }
+}
+
 export async function notifyLead(lead: LeadNotification) {
   if (!shouldNotify()) return;
 
@@ -264,4 +299,3 @@ export async function notifyFeedback(feedback: FeedbackNotification) {
     }
   }
 }
-

@@ -1,5 +1,6 @@
 "use client";
 import { ModalIDs } from "@/lib/constants";
+import { usePathname } from "next/navigation";
 import {
   createContext,
   MouseEventHandler,
@@ -9,6 +10,20 @@ import {
   useRef,
   useState,
 } from "react";
+
+function isModalId(value: string): value is ModalIDs {
+  return (
+    value === ModalIDs.Contact ||
+    value === ModalIDs.Inquiry ||
+    value === ModalIDs.Feedback
+  );
+}
+
+function getServiceSlugFromPathname(pathname: string) {
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts.length >= 2 && parts[0] === "services") return parts[1];
+  return undefined;
+}
 
 type ModalContextType = {
   dialog: RefObject<HTMLDialogElement>;
@@ -26,6 +41,8 @@ type ModalContextType = {
 export const ModalContext = createContext({} as ModalContextType);
 
 export default function ModalProvider({ children }: PropsWithChildren) {
+  const pathname = usePathname();
+
   const [modalId, setModalId] = useState<ModalIDs>();
   const [modalServiceSlug, setModalServiceSlug] = useState<string>();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -50,6 +67,22 @@ export default function ModalProvider({ children }: PropsWithChildren) {
     if (modalId) dialog.current?.showModal();
     else dialog.current?.close();
   }, [modalId]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const requested = params.get("modal")?.trim();
+    if (!requested) return;
+    if (!isModalId(requested)) return;
+
+    const requestedService =
+      params.get("service")?.trim() ||
+      (requested === ModalIDs.Inquiry
+        ? getServiceSlugFromPathname(pathname)
+        : undefined);
+
+    setModalId(requested);
+    setModalServiceSlug(requestedService);
+  }, [pathname]);
 
   return (
     <ModalContext.Provider

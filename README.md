@@ -72,6 +72,21 @@ Enable notifications when leads/feedback are submitted (recommended for producti
 - `NOTIFY_ENABLED` (optional; set `false` to disable)
 - `NOTIFY_SUBJECT_PREFIX` (optional; default `Fixam`)
 
+### Botpress live-handoff (optional)
+
+You can trigger a Slack/email alert when the bot detects a "talk to a human" request by calling:
+
+- `POST /api/botpress/handoff` with `Authorization: Bearer <BOTPRESS_WEBHOOK_SECRET>`
+
+Set:
+
+- `BOTPRESS_WEBHOOK_SECRET` (server-side)
+
+Tip: the website supports deep links to open forms:
+
+- `/?modal=contact`
+- `/?modal=inquiry&service=<service-slug>`
+
 ### Trustpilot (client-side widget)
 
 To show live Trustpilot reviews on the homepage, set:

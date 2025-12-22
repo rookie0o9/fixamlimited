@@ -1,65 +1,111 @@
 "use client";
-import { useEffect } from 'react'
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
-// Add this type declaration at the top of the file
 declare global {
   interface Window {
-    /* spell-ignore: botpress */
-    botpressWebChat?: {
-      init: (config: BotpressConfig) => void;
+    botpress?: {
+      initialized: boolean;
+      init: (config: BotpressInitConfig) => void;
+      updateUser?: (user: unknown) => Promise<void>;
     };
   }
 }
 
-interface BotpressConfig {
+type BotpressInitConfig = {
   botId: string;
   clientId: string;
-  hostUrl: string;
-  messagingUrl: string;
-  composerPlaceholder: string;
-  botName: string;
-  avatarUrl?: string;
-  theme?: string;
-  stylesheet?: string;
-  [key: string]: string | boolean | undefined;
+  configuration?: Record<string, unknown>;
+  theme?: unknown;
+  style?: string;
+  defaultState?: "opened" | "closed";
+};
+
+const INJECT_SRC = "https://cdn.botpress.cloud/webchat/v2.1/inject.js";
+const CONFIG_SRC =
+  "https://mediafiles.botpress.cloud/ccaafe5a-744e-4663-8a08-954745edbc86/webchat/v2.1/config.js";
+const INJECT_ID = "botpress-webchat-inject";
+const CONFIG_ID = "botpress-webchat-config";
+
+function getServiceSlugFromPathname(pathname: string) {
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts.length >= 2 && parts[0] === "services") return parts[1];
+  return undefined;
+}
+
+function loadScriptOnce(id: string, src: string) {
+  return new Promise<void>((resolve, reject) => {
+    const existing = document.getElementById(id) as HTMLScriptElement | null;
+    if (existing) {
+      if (existing.dataset.loaded === "true") resolve();
+      else existing.addEventListener("load", () => resolve(), { once: true });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = id;
+    script.src = src;
+    script.async = true;
+    script.addEventListener(
+      "load",
+      () => {
+        script.dataset.loaded = "true";
+        resolve();
+      },
+      { once: true }
+    );
+    script.addEventListener(
+      "error",
+      () => reject(new Error(`Failed to load script: ${src}`)),
+      { once: true }
+    );
+
+    document.body.appendChild(script);
+  });
 }
 
 export default function Botpress() {
+  const pathname = usePathname();
+
   useEffect(() => {
-    // Inject the main webchat script
-    const script1 = document.createElement('script')
-    script1.src = "https://cdn.botpress.cloud/webchat/v2.1/inject.js"
-    script1.async = true
-    document.body.appendChild(script1)
+    let cancelled = false;
 
-    // Inject the config script
-    const script2 = document.createElement('script')
-    script2.src = "https://mediafiles.botpress.cloud/ccaafe5a-744e-4663-8a08-954745edbc86/webchat/v2.1/config.js"
-    script2.async = true
-    document.body.appendChild(script2)
-
-    script2.onload = () => {
-      
-      window.botpressWebChat?.init({
-        /* spell-ignore: botpress */
-        "botId": "ccaafe5a-744e-4663-8a08-954745edbc86",
-        "clientId": "27c1cd90-ad39-416d-beed-8160ad5e745d",
-        "hostUrl": "https://cdn.botpress.cloud/webchat/v2.1",
-        "messagingUrl": "https://messaging.botpress.cloud",
-        "composerPlaceholder": "Chat with our support bot",
-        "botName": "Customer Support",
-        // You can customize these options as needed
-        "avatarUrl": "https://your-avatar-url.com/avatar.png",
-        "theme": "light",
-        "stylesheet": "https://your-stylesheet-url.com/style.css"
-      })
+    async function init() {
+      try {
+        await loadScriptOnce(INJECT_ID, INJECT_SRC);
+        if (cancelled) return;
+        await loadScriptOnce(CONFIG_ID, CONFIG_SRC);
+      } catch (error) {
+        console.error("Failed to load Botpress:", error);
+      }
     }
+
+    init();
 
     return () => {
-      document.body.removeChild(script1)
-      document.body.removeChild(script2)
-    }
-  }, [])
+      cancelled = true;
+    };
+  }, []);
 
-  return null
+  useEffect(() => {
+    const botpress = window.botpress;
+    if (!botpress?.initialized || !botpress.updateUser) return;
+
+    const url = window.location.href;
+    const query = window.location.search.replace(/^\?/, "");
+    const serviceSlug = getServiceSlugFromPathname(pathname);
+
+    botpress
+      .updateUser({
+        data: {
+          currentUrl: url,
+          pathname,
+          query,
+          serviceSlug,
+        },
+      })
+      .catch((error) => console.error("Failed to update Botpress user:", error));
+  }, [pathname]);
+
+  return null;
 }
