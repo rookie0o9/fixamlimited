@@ -21,9 +21,9 @@ type BotpressInitConfig = {
   defaultState?: "opened" | "closed";
 };
 
-const INJECT_SRC = "https://cdn.botpress.cloud/webchat/v2.1/inject.js";
+const INJECT_SRC = "https://cdn.botpress.cloud/webchat/v3.5/inject.js";
 const CONFIG_SRC =
-  "https://mediafiles.botpress.cloud/ccaafe5a-744e-4663-8a08-954745edbc86/webchat/v2.1/config.js";
+  "https://files.bpcontent.cloud/2025/12/23/01/20251223013207-8A8QRIIN.js";
 const INJECT_ID = "botpress-webchat-inject";
 const CONFIG_ID = "botpress-webchat-config";
 
