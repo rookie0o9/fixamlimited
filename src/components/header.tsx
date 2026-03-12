@@ -36,6 +36,12 @@ export default function Header() {
             >
               News
             </Link>
+            <Link
+              href="/blog"
+              className="hover:text-primary-alternate font-semibold underline-offset-4 cursor-pointer"
+            >
+              Blog
+            </Link>
             <ModalTrigger
               data-id={ModalIDs.Contact}
               className="hover:text-primary-alternate font-semibold underline-offset-4"

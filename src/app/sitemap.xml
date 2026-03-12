@@ -12,6 +12,36 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://fixam.co.uk/blog</loc>
+    <lastmod>2026-03-12T00:00:00.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://fixam.co.uk/blog/rebuilding-blog-fixam-modern-stack</loc>
+    <lastmod>2026-03-12T00:00:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://fixam.co.uk/blog/cyber-essentials-readiness-checklist-2026</loc>
+    <lastmod>2026-03-10T00:00:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://fixam.co.uk/blog/microsoft-365-security-baseline-for-growing-teams</loc>
+    <lastmod>2026-03-06T00:00:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://fixam.co.uk/blog/incident-response-runbook-template-for-small-it-teams</loc>
+    <lastmod>2026-03-02T00:00:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://fixam.co.uk/services/business-it-support</loc>
     <lastmod>2025-12-17T23:34:53.000Z</lastmod>
     <changefreq>monthly</changefreq>
