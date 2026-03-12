@@ -11,7 +11,7 @@
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 134 100% 27%;
+    --primary: 134 100% 26%;
     --primary-foreground: 356 29% 98%;
     --primary-alternate: 126, 94%, 43%;
     --secondary: 240 4.8% 95.9%;
@@ -38,7 +38,7 @@
     --card-foreground: 0 0% 98%;
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 134 100% 35%;
+    --primary: 134 100% 26%;
     --primary-foreground: 0 0% 98%;
     --primary-alternate: 126, 94%, 43%;
     --secondary: 240 3.7% 15.9%;
@@ -65,6 +65,15 @@
   body {
     @apply bg-background text-foreground;
     font-family: "helvetica neue", "Segoe UI", Arial;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  section[id],
+  div[id] {
+    scroll-margin-top: 5rem;
   }
 
   h1, h2, h3, h4, h5, h6 {

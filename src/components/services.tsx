@@ -18,7 +18,6 @@ export default function Services() {
             <Link
               key={slug}
               href={`/services/${slug}`}
-              aria-label={`Learn more about ${title}`}
               className="group flex flex-col gap-4 rounded-xl border bg-background p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <Icon className="h-12 w-12 text-primary" />
@@ -28,7 +27,7 @@ export default function Services() {
                   {description}
                 </p>
               </div>
-              <span className="text-sm font-semibold text-primary underline-offset-4 group-hover:underline">
+              <span className="text-sm font-semibold text-foreground underline-offset-4 group-hover:underline">
                 Learn more
               </span>
             </Link>

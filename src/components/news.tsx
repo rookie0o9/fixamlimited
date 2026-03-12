@@ -110,7 +110,7 @@ export default function News() {
                     {truncate(item.summary, 140)}
                   </p>
                 ) : null}
-                <span className="mt-auto text-sm font-medium text-primary">
+                <span className="mt-auto text-sm font-medium text-foreground">
                   Read more
                 </span>
               </a>
@@ -140,4 +140,3 @@ export default function News() {
     </section>
   );
 }
-

@@ -26,6 +26,7 @@ const CONFIG_SRC =
   "https://files.bpcontent.cloud/2025/12/23/01/20251223013207-8A8QRIIN.js";
 const INJECT_ID = "botpress-webchat-inject";
 const CONFIG_ID = "botpress-webchat-config";
+const BOTPRESS_IDLE_DELAY_MS = 7000;
 
 function getServiceSlugFromPathname(pathname: string) {
   const parts = pathname.split("/").filter(Boolean);
@@ -64,6 +65,34 @@ function loadScriptOnce(id: string, src: string) {
   });
 }
 
+function waitForEngagement() {
+  return new Promise<void>((resolve) => {
+    let resolved = false;
+    const eventNames = ["pointerdown", "keydown", "touchstart", "scroll"];
+    const listeners = eventNames.map((eventName) => {
+      const listener = () => {
+        if (resolved) return;
+        resolved = true;
+        for (const [name, fn] of listeners) {
+          window.removeEventListener(name, fn);
+        }
+        resolve();
+      };
+      window.addEventListener(eventName, listener, { passive: true, once: true });
+      return [eventName, listener] as const;
+    });
+
+    window.setTimeout(() => {
+      if (resolved) return;
+      resolved = true;
+      for (const [name, fn] of listeners) {
+        window.removeEventListener(name, fn);
+      }
+      resolve();
+    }, BOTPRESS_IDLE_DELAY_MS);
+  });
+}
+
 export default function Botpress() {
   const pathname = usePathname();
 
@@ -72,6 +101,8 @@ export default function Botpress() {
 
     async function init() {
       try {
+        await waitForEngagement();
+        if (cancelled) return;
         await loadScriptOnce(INJECT_ID, INJECT_SRC);
         if (cancelled) return;
         await loadScriptOnce(CONFIG_ID, CONFIG_SRC);

@@ -58,9 +58,38 @@ export default function ServicePage({ params }: PageProps) {
 
   const otherServices = services.filter((item) => item.slug !== service.slug);
   const Icon = service.Icon;
+  const serviceJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: service.title,
+    description: service.description,
+    serviceType: service.title,
+    areaServed: "GB",
+    url: `${siteUrl}/services/${service.slug}`,
+    provider: {
+      "@type": "ProfessionalService",
+      name: "Fixam",
+      url: siteUrl,
+      telephone: "+44 7733 738545",
+      email: "info@fixam.co.uk",
+    },
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: `${service.title} scope`,
+      itemListElement: service.includes.map((item, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: item,
+      })),
+    },
+  };
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
+      />
       <section className="w-full my-16 md:my-20 lg:mt-28 bg-background">
         <div className="container lg:py-10">
           <Link
@@ -180,7 +209,6 @@ export default function ServicePage({ params }: PageProps) {
                 <Link
                   key={other.slug}
                   href={`/services/${other.slug}`}
-                  aria-label={`Learn more about ${other.title}`}
                   className="group flex flex-col gap-4 rounded-xl border bg-background p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   <OtherIcon className="h-10 w-10 text-primary" />
@@ -190,7 +218,7 @@ export default function ServicePage({ params }: PageProps) {
                       {other.description}
                     </p>
                   </div>
-                  <span className="text-sm font-semibold text-primary underline-offset-4 group-hover:underline">
+                  <span className="text-sm font-semibold text-foreground underline-offset-4 group-hover:underline">
                     Learn more
                   </span>
                 </Link>
